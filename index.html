@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nik — Roblox Scripter</title>
+<meta name="description" content="Nik, Roblox scripter for 4+ years. Games, systems and commissions.">
+<style>
+  :root{--bg:#06070d;--panel:#0d1019;--line:#1d2233;--txt:#eaecf5;--mut:#8087a0;--a:#8b5cff;--b:#00f0c8;--c:#ff3d9a}
+  *{box-sizing:border-box;margin:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--txt);font:16px/1.6 system-ui,"Segoe UI",sans-serif;overflow-x:hidden;cursor:default}
+  a{color:inherit;text-decoration:none}
+  .mono,code,pre{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+  #bg{position:fixed;inset:0;z-index:-2}
+  #glow{position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:-1;
+    background:radial-gradient(circle,#8b5cff30,#00f0c812 45%,transparent 70%);transform:translate(-50%,-50%);left:50%;top:30%}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.05;
+    background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px)} /* scanlines */
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+  header{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:28px;
+    padding:10px 14px 10px 22px;border-radius:99px;background:#0d1019cc;backdrop-filter:blur(14px);border:1px solid var(--line)}
+  .logo{font-weight:800;letter-spacing:1px}.logo span{color:var(--b)}
+  header nav{display:flex;gap:4px}
+  header nav a{font-size:14px;color:var(--mut);padding:6px 14px;border-radius:99px;transition:.2s}
+  header nav a:hover{color:#fff;background:#ffffff12}
+
+  .hero{min-height:100vh;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:120px 0 60px}
+  .tag{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--b);border:1px solid #00f0c844;background:#00f0c80d;padding:5px 14px;border-radius:99px}
+  .tag i{width:8px;height:8px;border-radius:50%;background:var(--b);box-shadow:0 0 12px var(--b);animation:pulse 1.4s infinite}
+  @keyframes pulse{50%{opacity:.3;transform:scale(.7)}}
+  h1{font-size:clamp(42px,7vw,84px);line-height:1;margin:22px 0;letter-spacing:-3px;font-weight:900}
+  .grad{background:linear-gradient(100deg,var(--a),var(--b),var(--c),var(--a));background-size:300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 6s linear infinite}
+  @keyframes flow{to{background-position:300%}}
+  .glitch{position:relative;display:inline-block}
+  .glitch::before,.glitch::after{content:attr(data-t);position:absolute;inset:0;opacity:.8;-webkit-background-clip:text;background-clip:text}
+  .glitch::before{color:var(--c);transform:translate(2px,0);clip-path:inset(0 0 60% 0);animation:gl 3s infinite steps(1)}
+  .glitch::after{color:var(--b);transform:translate(-2px,0);clip-path:inset(60% 0 0 0);animation:gl 3s infinite steps(1) reverse}
+  @keyframes gl{0%,90%,100%{opacity:0}92%{opacity:.8;transform:translate(4px,-2px)}95%{opacity:.8;transform:translate(-4px,2px)}}
+  .type{font-size:clamp(18px,2.4vw,24px);color:var(--mut);min-height:2em}
+  .type b{color:var(--txt)}.caret{display:inline-block;width:2px;height:1.1em;background:var(--b);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .btns{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+  .btn{position:relative;padding:14px 26px;border-radius:12px;font-weight:700;border:1px solid var(--line);transition:.2s;overflow:hidden}
+  .btn.p{background:linear-gradient(100deg,var(--a),#4f7bff);border:0;box-shadow:0 8px 30px #8b5cff55}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 10px 36px #00f0c833;border-color:var(--b)}
+
+  .win{background:#0a0c14;border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 80px #8b5cff25,0 0 0 1px #ffffff06;transform:perspective(1000px) rotateY(-8deg) rotateX(4deg);transition:transform .3s;animation:float 6s ease-in-out infinite}
+  .win:hover{transform:perspective(1000px) rotateY(0) rotateX(0)}
+  @keyframes float{50%{translate:0 -10px}}
+  .bar{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center}
+  .bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.bar i:nth-child(2){background:#febc2e}.bar i:nth-child(3){background:#28c840}
+  .bar span{margin-left:10px;font-size:12px;color:var(--mut)}
+  pre{padding:18px 20px;font-size:13px;line-height:1.7;min-height:330px;white-space:pre-wrap;color:#c9d1e8}
+  .k{color:#c792ff}.f{color:#5fb3ff}.s{color:#7ee787}.n{color:#ffb86b}.c{color:#566080}
+
+  .strip{overflow:hidden;border-block:1px solid var(--line);background:#0a0c1488;padding:18px 0;margin:0 -24px;white-space:nowrap;mask:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+  .strip div{display:inline-block;animation:scroll 28s linear infinite}
+  .strip span{font-size:20px;font-weight:800;color:#ffffff22;margin:0 28px;letter-spacing:1px;text-transform:uppercase}
+  .strip span:nth-child(even){color:#00f0c855}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;padding:80px 0 20px}
+  .stat{border:1px solid var(--line);border-radius:16px;padding:26px;background:linear-gradient(160deg,#0d1019,#090b12)}
+  .stat b{display:block;font-size:52px;line-height:1;font-weight:900;background:linear-gradient(100deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat span{color:var(--mut);font-size:14px}
+
+  section{padding:90px 0}
+  h2{font-size:clamp(30px,5vw,52px);letter-spacing:-2px;font-weight:900;margin-bottom:12px}
+  .eyebrow{font-size:13px;color:var(--b);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+  .sub{color:var(--mut);margin-bottom:44px;max-width:520px}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+  .card{--mx:50%;--my:50%;position:relative;display:flex;flex-direction:column;gap:12px;min-height:270px;padding:28px;border-radius:20px;background:var(--panel);border:1px solid var(--line);overflow:hidden;transform-style:preserve-3d;transition:transform .15s,border-color .3s}
+  .card::before{content:"";position:absolute;inset:0;background:radial-gradient(300px circle at var(--mx) var(--my),#8b5cff33,transparent 60%);opacity:0;transition:.3s}
+  .card:hover::before{opacity:1}.card:hover{border-color:#8b5cff88}
+  .card>*{position:relative}
+  .card .num{position:absolute;right:20px;top:6px;font-size:90px;font-weight:900;color:#ffffff07;line-height:1}
+  .badge{align-self:flex-start;font-size:12px;color:var(--b);border:1px solid #00f0c844;border-radius:99px;padding:2px 12px}
+  .card h3{font-size:26px;letter-spacing:-1px}
+  .card p{color:var(--mut);font-size:15px;flex:1}
+  .go{font-weight:700;color:var(--b);font-size:14px;transition:.2s}.card:hover .go{letter-spacing:1px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:12px}
+  .chip{padding:11px 18px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:14px;transition:.2s}
+  .chip:hover{border-color:var(--b);color:var(--b);transform:translateY(-3px) rotate(-1deg);box-shadow:0 8px 24px #00f0c822}
+
+  .videos{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+  .vid{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--panel);transition:.3s}
+  .vid img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;transition:.5s;filter:saturate(.8) brightness(.8)}
+  .vid:hover{border-color:var(--c);box-shadow:0 14px 50px #ff3d9a33;transform:translateY(-6px)}
+  .vid:hover img{transform:scale(1.07);filter:none}
+  .vid div{padding:16px 20px;font-weight:700;display:flex;justify-content:space-between}
+  .vid::after{content:"▶";position:absolute;top:calc(50% - 30px);left:50%;translate:-50% -50%;width:60px;height:60px;border-radius:50%;background:#000a;border:1px solid #fff4;display:grid;place-items:center;padding-left:4px;transition:.3s}
+  .vid:hover::after{background:var(--c);scale:1.15}
+
+  .cta{position:relative;border-radius:28px;padding:2px;background:conic-gradient(from var(--r,0deg),var(--a),var(--b),var(--c),var(--a));animation:spin 6s linear infinite}
+  @property --r{syntax:"<angle>";initial-value:0deg;inherits:false}
+  @keyframes spin{to{--r:360deg}}
+  .cta>div{background:#080a12;border-radius:26px;padding:clamp(28px,6vw,64px);text-align:center}
+  .cta h2{margin-bottom:14px}.cta p{color:var(--mut);max-width:520px;margin:0 auto 30px}
+  .links{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .links a{border:1px solid var(--line);border-radius:12px;padding:12px 22px;font-weight:600;background:#0d1019;transition:.2s;cursor:pointer}
+  .links a:hover{border-color:var(--b);color:var(--b);transform:translateY(-3px)}
+  footer{padding:50px 0;text-align:center;color:var(--mut);font-size:13px}
+
+  .rv{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s}.rv.on{opacity:1;transform:none}
+  @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:110px}.win{transform:none;animation:none}header nav a{padding:6px 9px}header{gap:10px}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas><div id="glow"></div>
+<header>
+  <a class="logo mono" href="#">NIK<span>.lua</span></a>
+  <nav><a href="#works">Works</a><a href="#skills">Skills</a><a href="#videos">Videos</a><a href="#contact">Contact</a></nav>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <span class="tag mono"><i></i>open for commissions</span>
+      <h1>I script <span class="grad glitch" data-t="Roblox">Roblox</span> worlds that <span class="grad">scale.</span></h1>
+      <p class="type mono">&gt; Hi, I'm Nik. I build <b id="word"></b><span class="caret"></span></p>
+      <div class="btns"><a class="btn p" href="#works">Explore my work</a><a class="btn" href="#contact">Hire me →</a></div>
+    </div>
+    <div class="win">
+      <div class="bar"><i></i><i></i><i></i><span class="mono">PetService.lua</span></div>
+      <pre id="code"></pre>
+    </div>
+  </div>
+
+  <div class="strip"><div id="mq"></div></div>
+
+  <div class="stats rv">
+    <div class="stat"><b data-n="4" data-s="+">0</b><span>years scripting</span></div>
+    <div class="stat"><b data-n="3">0</b><span>games shipped</span></div>
+    <div class="stat"><b data-n="50" data-s="+">0</b><span>systems built*</span></div>
+    <div class="stat"><b data-n="100" data-s="%">0</b><span>server-side secure</span></div>
+  </div>
+
+  <section id="works">
+    <div class="eyebrow mono">// 01 — works</div>
+    <h2 class="rv">Things I've shipped.</h2>
+    <p class="sub rv">Solo builds, live multiplayer games and a long list of client commissions.</p>
+    <div class="cards">
+      <a class="card rv" href="https://www.roblox.com/games/124827118382654/Magic-Simulator" target="_blank" rel="noopener">
+        <span class="num">01</span><span class="badge mono">solo project</span><h3>Magic Simulator</h3>
+        <p>A complete, solo-developed simulator in the style of cash-grab hits: progression, pets and polish, all built end to end.</p><span class="go">PLAY ON ROBLOX →</span></a>
+      <a class="card rv" href="https://www.roblox.com/games/77255138757462/Did-you-know" target="_blank" rel="noopener">
+        <span class="num">02</span><span class="badge mono">live multiplayer</span><h3>Did You Know?</h3>
+        <p>Competitive educational trivia with round-based progression. Players race live across Science, History, Geography and Roblox, with minigames closing out each round.</p><span class="go">PLAY ON ROBLOX →</span></a>
+      <a class="card rv" href="https://www.roblox.com/games/119366239813943/Close-The-Box" target="_blank" rel="noopener">
+        <span class="num">03</span><span class="badge mono">1v1 competitive</span><h3>Close The Box</h3>
+        <p>A two-player board game with an RNG skin system, leaderboards and more.</p><span class="go">PLAY ON ROBLOX →</span></a>
+      <a class="card rv" href="#contact">
+        <span class="num">04</span><span class="badge mono">freelance</span><h3>Commissions</h3>
+        <p>Many completed commissions with all kinds of systems, from combat to simulator genres.</p><span class="go">ORDER ONE →</span></a>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="eyebrow mono">// 02 — skills</div>
+    <h2 class="rv">What's in the toolbox.</h2>
+    <p class="sub rv">Core systems I've implemented across genres.</p>
+    <div class="chips rv" id="chips"></div>
+  </section>
+
+  <section id="videos">
+    <div class="eyebrow mono">// 03 — videos</div>
+    <h2 class="rv">See it in action.</h2>
+    <p class="sub rv">Gameplay and showcases of my projects.</p>
+    <div class="videos">
+      <a class="vid rv" href="https://www.youtube.com/watch?v=RHHYgw4L7G0" target="_blank" rel="noopener"><img loading="lazy" alt="" src="https://img.youtube.com/vi/RHHYgw4L7G0/hqdefault.jpg"><div>Magic Simulator</div></a>
+      <a class="vid rv" href="https://www.youtube.com/watch?v=Q299nyzlr4c" target="_blank" rel="noopener"><img loading="lazy" alt="" src="https://img.youtube.com/vi/Q299nyzlr4c/hqdefault.jpg"><div>Did You Know?</div></a>
+      <a class="vid rv" href="https://www.youtube.com/watch?v=IUzy0cpYQys" target="_blank" rel="noopener"><img loading="lazy" alt="" src="https://img.youtube.com/vi/IUzy0cpYQys/hqdefault.jpg"><div>Ragnarok</div></a>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="cta rv"><div>
+      <div class="eyebrow mono">// 04 — contact</div>
+      <h2>Let's build something <span class="grad">insane.</span></h2>
+      <p>To order, DM me on Discord (<b>@nikokenn</b>) or send an email. Payments via PayPal or Robux only.</p>
+      <div class="links">
+        <a href="mailto:2nikk.roblox1@gmail.com">✉ Email</a>
+        <a href="https://www.roblox.com/users/897480348/profile" target="_blank" rel="noopener">Roblox</a>
+        <a href="https://github.com/2nnik" target="_blank" rel="noopener">GitHub</a>
+        <a id="dc">Discord</a>
+      </div>
+    </div></div>
+  </section>
+</main>
+<footer class="mono">© Nik · * a lot of them. ask me.</footer>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+// skills + marquee
+const skills=["Pet systems: equip · upgrade · hatch","Inventory & DataStore","Secure server-side handling","Combat frameworks","Simulator progression","Modular architecture","Knit + OOP","ReplicaService","RoJo / TypeScript"];
+$('#chips').innerHTML=skills.map(s=>`<span class="chip">${s}</span>`).join('');
+const m=["Luau","Knit","ReplicaService","DataStore","Combat","Simulators","RoJo","TypeScript","OOP","Pets"].map(s=>`<span>${s}</span>`).join('');
+$('#mq').innerHTML=m+m;
+
+// discord copy
+$('#dc').onclick=e=>{navigator.clipboard?.writeText('nikokenn');e.target.textContent='Copied: nikokenn ✓'};
+
+// rotating typewriter
+const words=["pet & hatching systems","secure DataStores","combat frameworks","simulators that retain","modular Knit architecture"];
+let wi=0,ci=0,del=false;
+(function tick(){
+  const w=words[wi];ci+=del?-1:1;$('#word').textContent=w.slice(0,ci);
+  let d=del?25:60;
+  if(!del&&ci===w.length){del=true;d=1400}else if(del&&ci===0){del=false;wi=(wi+1)%words.length;d=300}
+  setTimeout(tick,reduce?1e9:d);
+})();
+if(reduce)$('#word').textContent=words[0];
+
+// code window: type pre-highlighted html, counting only visible chars
+const code=`<span class="c">-- PetService.lua  ·  server-authoritative</span>
+<span class="k">local</span> <span class="n">Knit</span> = <span class="f">require</span>(<span class="n">Packages</span>.<span class="n">Knit</span>)
+
+<span class="k">local</span> <span class="n">PetService</span> = <span class="n">Knit</span>.<span class="f">CreateService</span>{
+  <span class="n">Name</span> = <span class="s">"PetService"</span>,
+}
+
+<span class="k">function</span> <span class="n">PetService</span>:<span class="f">Hatch</span>(<span class="n">player</span>, <span class="n">egg</span>)
+  <span class="k">local</span> <span class="n">data</span> = <span class="n">self</span>.<span class="n">Data</span>:<span class="f">Get</span>(<span class="n">player</span>)
+  <span class="k">if</span> <span class="n">data</span>.<span class="n">Gems</span> &lt; <span class="n">egg</span>.<span class="n">Cost</span> <span class="k">then</span>
+    <span class="k">return</span> <span class="n">nil</span>, <span class="s">"not enough gems"</span>
+  <span class="k">end</span>
+  <span class="n">data</span>.<span class="n">Gems</span> -= <span class="n">egg</span>.<span class="n">Cost</span>
+  <span class="k">local</span> <span class="n">pet</span> = <span class="f">rollWeighted</span>(<span class="n">egg</span>.<span class="n">Pool</span>)
+  <span class="n">self</span>.<span class="n">Inventory</span>:<span class="f">Add</span>(<span class="n">player</span>, <span class="n">pet</span>)
+  <span class="k">return</span> <span class="n">pet</span>  <span class="c">-- never trust the client</span>
+<span class="k">end</span>`;
+const toks=code.match(/<[^>]+>|&\w+;|[\s\S]/g);
+const vis=toks.filter(t=>t[0]!=='<').length;
+const pre=$('#code');
+let n=0;
+function render(k){let c=0,o='';for(const t of toks){if(t[0]==='<')o+=t;else if(c++<k)o+=t}return o}
+(function type(){
+  n=reduce?vis:n+1;pre.innerHTML=render(n);
+  if(n<vis)setTimeout(type,18);else setTimeout(()=>{n=0;type()},5000);
+})();
+
+// scroll reveal + counters
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('on');
+  e.target.querySelectorAll?.('[data-n]').forEach(el=>{const to=+el.dataset.n,s=el.dataset.s||'';let t0;
+    const f=t=>{t0??=t;const p=Math.min((t-t0)/1400,1);el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+s;p<1&&requestAnimationFrame(f)};requestAnimationFrame(f)});
+  io.unobserve(e.target)}),{threshold:.15});
+$$('.rv').forEach(el=>io.observe(el));
+
+// cursor glow + card spotlight/tilt
+addEventListener('pointermove',e=>{const g=$('#glow');g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'});
+$$('.card').forEach(c=>{
+  c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+    c.style.setProperty('--mx',x+'px');c.style.setProperty('--my',y+'px');
+    if(!reduce)c.style.transform=`perspective(800px) rotateX(${(.5-y/r.height)*8}deg) rotateY(${(x/r.width-.5)*8}deg) translateY(-4px)`});
+  c.addEventListener('pointerleave',()=>c.style.transform='');
+});
+
+// particle network background
+const cv=$('#bg'),cx=cv.getContext('2d');let W,H,P=[],mouse={x:-999,y:-999};
+function size(){W=cv.width=innerWidth;H=cv.height=innerHeight;P=Array.from({length:Math.min(90,W*H/16000|0)},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
+size();addEventListener('resize',size);addEventListener('pointermove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+(function draw(){
+  cx.clearRect(0,0,W,H);
+  for(const p of P){p.x=(p.x+p.vx+W)%W;p.y=(p.y+p.vy+H)%H;
+    const dx=p.x-mouse.x,dy=p.y-mouse.y,d=Math.hypot(dx,dy);if(d<140){p.x+=dx/d*1.2;p.y+=dy/d*1.2}
+    cx.fillStyle='#00f0c8aa';cx.fillRect(p.x,p.y,2,2)}
+  for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const d=Math.hypot(P[i].x-P[j].x,P[i].y-P[j].y);
+    if(d<130){cx.strokeStyle=`rgba(139,92,255,${(1-d/130)*.35})`;cx.beginPath();cx.moveTo(P[i].x,P[i].y);cx.lineTo(P[j].x,P[j].y);cx.stroke()}}
+  if(!reduce)requestAnimationFrame(draw)
+})();
+</script>
+</body>
+</html>
