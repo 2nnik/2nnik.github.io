@@ -105,6 +105,30 @@
   .links a:hover{border-color:var(--b);color:var(--b);transform:translateY(-3px)}
   footer{padding:50px 0;text-align:center;color:var(--mut);font-size:13px}
 
+  /* boot, progress, cursor, terminal, cube */
+  #boot{position:fixed;inset:0;z-index:100;background:#04050a;display:grid;place-items:center;transition:opacity .6s,visibility .6s;cursor:pointer}
+  #boot.off{opacity:0;visibility:hidden}
+  #boot pre{min-height:0;font-size:14px;color:var(--b);padding:0}
+  #boot .bar2{height:3px;width:260px;background:var(--line);margin-top:16px;border-radius:9px;overflow:hidden}
+  #boot .bar2 i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b));transition:width 1.8s cubic-bezier(.2,.8,.2,1)}
+  #prog{position:fixed;top:0;left:0;height:3px;width:0;z-index:60;background:linear-gradient(90deg,var(--a),var(--b),var(--c));box-shadow:0 0 12px var(--b)}
+  #dot,#ring{position:fixed;left:0;top:0;pointer-events:none;z-index:70;border-radius:50%;display:none}
+  .fine #dot,.fine #ring{display:block}.fine,.fine *{cursor:none!important}
+  #dot{width:6px;height:6px;background:var(--b);margin:-3px 0 0 -3px}
+  #ring{width:38px;height:38px;margin:-19px 0 0 -19px;border:1.5px solid #00f0c888;transition:width .2s,height .2s,margin .2s,background .2s,border-color .2s}
+  #ring.hov{width:64px;height:64px;margin:-32px 0 0 -32px;background:#8b5cff22;border-color:var(--a)}
+  .cubewrap{position:relative}
+  #cube{position:absolute;right:-70px;top:-90px;width:260px;height:260px;z-index:-1;pointer-events:none;opacity:.9}
+  #tbtn{position:fixed;right:20px;bottom:20px;z-index:30;padding:10px 16px;border-radius:12px;background:#0d1019dd;backdrop-filter:blur(10px);border:1px solid var(--line);font-size:13px;color:var(--b);transition:.2s;cursor:pointer}
+  #tbtn:hover{border-color:var(--b);box-shadow:0 0 24px #00f0c833}
+  #tbtn kbd{background:#ffffff14;border-radius:5px;padding:1px 7px;margin-left:6px;color:var(--txt)}
+  #term{position:fixed;left:50%;bottom:24px;translate:-50% 130%;width:min(720px,94vw);z-index:90;background:#07080fee;backdrop-filter:blur(16px);border:1px solid var(--a);border-radius:16px;box-shadow:0 20px 80px #8b5cff55;transition:translate .35s cubic-bezier(.2,.9,.3,1.1);font-size:14px}
+  #term.open{translate:-50% 0}
+  #tout{max-height:260px;overflow:auto;padding:16px 18px 0;white-space:pre-wrap;color:#b9c0d8}
+  #tout a{color:var(--b);text-decoration:underline}
+  #tin{display:flex;gap:10px;padding:14px 18px;color:var(--b)}
+  #tin input{flex:1;background:none;border:0;outline:0;color:var(--txt);font:inherit}
+  .spark{position:fixed;width:7px;height:7px;border-radius:2px;pointer-events:none;z-index:65}
   .rv{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s}.rv.on{opacity:1;transform:none}
   @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:110px}.win{transform:none;animation:none}header nav a{padding:6px 9px}header{gap:10px}}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
@@ -112,6 +136,10 @@
 </head>
 <body>
 <canvas id="bg"></canvas><div id="glow"></div>
+<div id="boot"><div><pre id="bootlog" class="mono"></pre><div class="bar2"><i id="bootbar"></i></div><div class="mono" style="color:var(--mut);font-size:12px;margin-top:10px">click to skip</div></div></div>
+<div id="prog"></div><div id="dot"></div><div id="ring"></div>
+<button id="tbtn" class="mono" aria-label="Open terminal">&gt;_ terminal <kbd>/</kbd></button>
+<div id="term" class="mono" role="dialog" aria-label="Terminal"><div id="tout"></div><label id="tin">❯<input id="cmd" autocomplete="off" spellcheck="false" placeholder="type help"></label></div>
 <header>
   <a class="logo mono" href="#">NIK<span>.lua</span></a>
   <nav><a href="#works">Works</a><a href="#skills">Skills</a><a href="#videos">Videos</a><a href="#contact">Contact</a></nav>
@@ -125,10 +153,11 @@
       <p class="type mono">&gt; Hi, I'm Nik. I build <b id="word"></b><span class="caret"></span></p>
       <div class="btns"><a class="btn p" href="#works">Explore my work</a><a class="btn" href="#contact">Hire me →</a></div>
     </div>
+    <div class="cubewrap"><canvas id="cube" width="520" height="520"></canvas>
     <div class="win">
       <div class="bar"><i></i><i></i><i></i><span class="mono">PetService.lua</span></div>
       <pre id="code"></pre>
-    </div>
+    </div></div>
   </div>
 
   <div class="strip"><div id="mq"></div></div>
@@ -261,6 +290,76 @@ $$('.card').forEach(c=>{
     if(!reduce)c.style.transform=`perspective(800px) rotateX(${(.5-y/r.height)*8}deg) rotateY(${(x/r.width-.5)*8}deg) translateY(-4px)`});
   c.addEventListener('pointerleave',()=>c.style.transform='');
 });
+
+// boot screen (once per session)
+const boot=$('#boot');
+if(reduce||sessionStorage.boot){boot.remove()}else{
+  const L=["> booting nik.lua ...","> loading Knit .............. ok","> mounting DataStore ........ ok","> verifying server authority  ok","> 6 games · 100+ systems .... ok","> welcome."];
+  let i=0;const log=$('#bootlog');
+  const t=setInterval(()=>{log.textContent+=(i?"\n":"")+L[i++];$('#bootbar').style.width=(i/L.length*100)+'%';if(i>=L.length){clearInterval(t);setTimeout(done,450)}},280);
+  function done(){boot.classList.add('off');sessionStorage.boot=1;setTimeout(()=>boot.remove(),700)}
+  boot.onclick=()=>{clearInterval(t);done()};
+}
+
+// scroll progress
+addEventListener('scroll',()=>{$('#prog').style.width=scrollY/(document.body.scrollHeight-innerHeight)*100+'%'},{passive:true});
+
+// custom cursor + magnetic buttons + click sparks
+if(matchMedia('(pointer:fine)').matches&&!reduce){
+  document.documentElement.classList.add('fine');
+  let rx=0,ry=0,tx=0,ty=0;
+  addEventListener('pointermove',e=>{tx=e.clientX;ty=e.clientY;$('#dot').style.transform=`translate(${tx}px,${ty}px)`});
+  (function f(){rx+=(tx-rx)*.18;ry+=(ty-ry)*.18;$('#ring').style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(f)})();
+  document.addEventListener('pointerover',e=>$('#ring').classList.toggle('hov',!!e.target.closest('a,button,.chip,input')));
+  $$('.btn,.links a,#tbtn').forEach(b=>{
+    b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.25}px,${(e.clientY-r.top-r.height/2)*.35}px)`});
+    b.addEventListener('pointerleave',()=>b.style.transform='')});
+  addEventListener('click',e=>{for(let i=0;i<14;i++){const s=document.createElement('i');s.className='spark';
+    s.style.cssText+=`left:${e.clientX}px;top:${e.clientY}px;background:${['#8b5cff','#00f0c8','#ff3d9a'][i%3]}`;document.body.append(s);
+    const a=Math.PI*2*i/14,d=40+Math.random()*50;
+    s.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) rotate(260deg)`,opacity:0}],{duration:700,easing:'ease-out'}).onfinish=()=>s.remove()}});
+}
+
+// heading scramble on reveal
+const so=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;so.unobserve(e.target);if(reduce)return;
+  const el=e.target,txt=el.textContent;let f=0;
+  const id=setInterval(()=>{el.textContent=[...txt].map((c,i)=>c===' '||i<f?c:"01<>/{}#$"[Math.random()*9|0]).join('');if(++f>txt.length){clearInterval(id);el.textContent=txt}},15)}),{threshold:.6});
+$$('section h2').forEach(h=>so.observe(h));
+
+// rotating 3D wireframe cube
+(()=>{const c=$('#cube'),g=c.getContext('2d');let ax=.6,ay=.4,vx=.004,vy=.006;
+  const V=[];for(let x=-1;x<=1;x+=2)for(let y=-1;y<=1;y+=2)for(let z=-1;z<=1;z+=2)V.push([x,y,z]);
+  const E=[];V.forEach((a,i)=>V.forEach((b,j)=>{if(j>i&&a.filter((v,k)=>v!==b[k]).length===1)E.push([i,j])}));
+  addEventListener('pointermove',e=>{vy=(e.clientX/innerWidth-.5)*.03;vx=(e.clientY/innerHeight-.5)*.03});
+  function pr([x,y,z],s){let c1=Math.cos(ay),s1=Math.sin(ay);[x,z]=[x*c1+z*s1,-x*s1+z*c1];c1=Math.cos(ax);s1=Math.sin(ax);[y,z]=[y*c1-z*s1,y*s1+z*c1];const p=3/(3+z*.6);return[260+x*s*p,260+y*s*p,z]}
+  (function d(){ax+=vx+.003;ay+=vy+.004;g.clearRect(0,0,520,520);
+    for(const [k,s,col] of [[0,150,'#8b5cff'],[1,80,'#00f0c8']]){const P=V.map(v=>pr(v,s));g.strokeStyle=col;g.lineWidth=2;g.shadowColor=col;g.shadowBlur=14;
+      g.beginPath();E.forEach(([a,b])=>{g.moveTo(P[a][0],P[a][1]);g.lineTo(P[b][0],P[b][1])});g.stroke()}
+    if(!reduce)requestAnimationFrame(d)})()})();
+
+// terminal: "/" or Ctrl+K opens, Esc closes
+const term=$('#term'),tout=$('#tout'),cmd=$('#cmd');
+const say=t=>{tout.innerHTML+=t+"\n";tout.scrollTop=1e9};
+const go=h=>{term.classList.remove('open');location.hash=h};
+const C={
+  help:()=>say("commands: <b>works  skills  videos  contact  discord  about  clear  exit</b>\n(try: <b>sudo hire nik</b>)"),
+  about:()=>say("Nik — Roblox scripter, 4+ years. Knit, OOP, ReplicaService, RoJo/TypeScript."),
+  works:()=>{say("1. Magic Simulator\n2. Did You Know?\n3. Close The Box\n4. Commissions\n→ scrolling...");setTimeout(()=>go('works'),500)},
+  skills:()=>{say("→ scrolling...");setTimeout(()=>go('skills'),400)},
+  videos:()=>{say("→ scrolling...");setTimeout(()=>go('videos'),400)},
+  contact:()=>{say("→ scrolling...");setTimeout(()=>go('contact'),400)},
+  discord:()=>{navigator.clipboard?.writeText('nikokenn');say("discord: nikokenn (copied)")},
+  clear:()=>tout.innerHTML="",
+  exit:()=>term.classList.remove('open'),
+  "sudo hire nik":()=>{say("[sudo] permission granted. opening contact...");setTimeout(()=>go('contact'),700)}
+};
+const toggle=o=>{term.classList.toggle('open',o);if(term.classList.contains('open')){cmd.focus();if(!tout.innerHTML)say("nik.lua terminal — type <b>help</b>")}else cmd.blur()};
+$('#tbtn').onclick=()=>toggle();
+addEventListener('keydown',e=>{
+  if(e.key==='Escape')toggle(false);
+  else if((e.key==='/'&&document.activeElement!==cmd)||(e.ctrlKey&&e.key==='k')){e.preventDefault();toggle(true)}});
+cmd.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=cmd.value.trim().toLowerCase();cmd.value='';if(!v)return;
+  say("❯ "+v.replace(/</g,'&lt;'));(C[v]||(()=>say("command not found: "+v.replace(/</g,'&lt;')+". try <b>help</b>")))()});
 
 // particle network background
 const cv=$('#bg'),cx=cv.getContext('2d');let W,H,P=[],mouse={x:-999,y:-999};
